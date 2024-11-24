@@ -1,0 +1,21 @@
+FROM scratch as part1
+ADD alpine-minirootfs-3.20.3-aarch64.tar /
+RUN apk add --no-cache nodejs npm
+RUN mkdir -p /var/node
+WORKDIR /var/node
+ADD src ./
+RUN npm install
+ARG VERSION
+ENV APP_VER=production.${VERSION:-v1.0}
+CMD ["node", "index.js"]
+
+FROM nginx:alpine
+RUN rm -rf /usr/share/nginx/html/*
+COPY --from=part1 /var/node /usr/share/nginx/html
+RUN chmod -R 755 /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/nginx.conf
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
+  CMD curl --silent --fail http://localhost:8080/ || exit 1
+EXPOSE 80
+EXPOSE 8080
+CMD ["nginx", "-g", "daemon off;"]

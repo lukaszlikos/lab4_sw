@@ -1,0 +1,4 @@
+docker build -f Dockerfile_classic --build-arg VERSION=1.0.0 -t index .
+docker run -p 8081:8080 -e VERSION=3.0.1 --name test index
+
+

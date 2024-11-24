@@ -1,0 +1,10 @@
+FROM scratch
+ADD alpine-minirootfs-3.20.3-aarch64.tar /
+RUN apk add --no-cache nodejs npm
+RUN mkdir -p /var/node
+WORKDIR /var/node
+ADD src ./
+RUN npm install
+ARG VERSION
+ENV APP_VER=production.${VERSION:-v1.0}
+CMD ["node", "index.js"]
